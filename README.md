@@ -1,2 +1,1 @@
-# twitter-clone
-Fullstack distributed twitter clone
+# Fullstack distributed Twitter clone
