@@ -5,7 +5,7 @@ const app = express();
 app.use(express.json());
 const fileRoutes = require("./routes/filesRoutes");
 
-app.use("/api/file/upload", fileRoutes);
+app.use("/api/file", fileRoutes);
 
 app.listen(process.env.PORT, () => {
   console.log("[!] server is running on port:", process.env.PORT);
