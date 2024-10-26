@@ -19,6 +19,14 @@ async function saveFileToDisk(fileBuffer, filename, fileId) {
       },
     });
   } catch (err) {
+    await prisma.file.update({
+      where: {
+        id: fileId,
+      },
+      data: {
+        status: "Failed",
+      },
+    });
     console.log(err);
   }
 }
