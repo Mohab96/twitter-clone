@@ -1,29 +1,72 @@
 const { PrismaClient } = require("@prisma/client");
+const amqp = require("amqplib");
+const prisma = new PrismaClient();
 const path = require("path");
 const fs = require("fs");
-const prisma = new PrismaClient();
+const {
+  HTTP_400_BAD_REQUEST,
+  HTTP_201_CREATED,
+  HTTP_500_INTERNAL_SERVER_ERROR,
+  HTTP_404_NOT_FOUND,
+  HTTP_202_Accepted,
+  HTTP_102_Processing,
+  HTTP_200_SUCCESS,
+} = require("../utils/statusCodes");
+const RMQURL = process.env.RMQURL;
 
+async function pushToQueue(buffer, fileInfo, id) {
+  try {
+    const connection = await amqp.connect(RMQURL);
+    const channel = await connection.createChannel();
+    await channel.assertQueue("files", { durable: true });
+    const message = {
+      buffer: buffer,
+      fileName: fileInfo.originalname,
+      fileId: id,
+    };
+    await channel.sendToQueue("files", Buffer.from(JSON.stringify(message)));
+    console.log("Message Sent!");
+    await channel.close();
+    await connection.close();
+  } catch (err) {
+    try {
+      await prisma.file.update({
+        where: {
+          id: id,
+        },
+        data: {
+          status: "Failed",
+        },
+      });
+    } catch (err) {
+      console.log("Error happened with the database", err);
+    }
+    console.log("Error happend, message did not sent to the queue", err);
+  }
+}
 const storeFile = async (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({
+      return res.status(HTTP_400_BAD_REQUEST).json({
         status: "Fail",
         message: "No File Uploaded.",
       });
     }
-    const Path = "uploads/" + req.file.filename;
+    req.file.originalname = Date.now() + path.extname(req.file.originalname);
+    const Path = "uploads/" + req.file.originalname;
     const newFile = await prisma.file.create({
       data: {
         path: Path,
       },
     });
-    return res.status(200).json({
+    res.status(HTTP_201_CREATED).json({
       status: "Ok",
       id: newFile.id,
     });
+    await pushToQueue(req.file.buffer, req.file, newFile.id);
   } catch (error) {
     console.error("Error uploading files:", error);
-    return res.status(500).json({
+    return res.status(HTTP_500_INTERNAL_SERVER_ERROR).json({
       status: "Error",
       message: "Error uploading files",
     });
@@ -32,6 +75,11 @@ const storeFile = async (req, res) => {
 
 const sendFile = async (req, res) => {
   try {
+    if (!req.params.fileId) {
+      return res
+        .status(HTTP_400_BAD_REQUEST)
+        .json({ status: "Fail", message: "File ID is not provided" });
+    }
     const fileId = +req.params.fileId;
     const file = await prisma.file.findFirst({
       where: {
@@ -39,20 +87,46 @@ const sendFile = async (req, res) => {
       },
     });
     if (!file) {
-      return res.status(404).json({
+      return res.status(HTTP_404_NOT_FOUND).json({
         status: "Fail",
         message: "File Not Found",
       });
     }
+    if (file.status === "In Queue") {
+      return res
+        .status(HTTP_202_Accepted)
+        .json({ status: "Ok", messae: "File is still in queue." });
+    }
+    if (file.status === "In progress") {
+      return res
+        .status(HTTP_102_Processing)
+        .json({ status: "Ok", messae: "File is under processing" });
+    }
+    if (file.status === "Failed") {
+      return res
+        .status(HTTP_200_SUCCESS)
+        .json({ status: "Ok", messae: "File failed to be processed" });
+    }
     const FilePath = file.path;
     var uploadDir = path.join(__dirname, "../" + FilePath);
-
-    /// TODO: change mime type to [png, jpeg, jpg, gif]
-    res.setHeader("Content-Type", "image/png");
-    const stream = fs.createReadStream(uploadDir);
-    stream.pipe(res);
+    fs.access(uploadDir, fs.constants.F_OK, (err) => {
+      if (err) {
+        return res
+          .status(HTTP_404_NOT_FOUND)
+          .json({ status: "Fail", message: "File not found" });
+      }
+      res.download(uploadDir, (err) => {
+        if (err) {
+          return res
+            .status(HTTP_500_INTERNAL_SERVER_ERROR)
+            .json({ status: "Error", message: err });
+        }
+      });
+    });
   } catch (error) {
-    res.status(500).json({ status: "Error", message: error });
+    res
+      .status(HTTP_500_INTERNAL_SERVER_ERROR)
+      .json({ status: "Error", message: error });
   }
 };
 module.exports = { storeFile, sendFile };
