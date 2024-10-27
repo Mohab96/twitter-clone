@@ -64,3 +64,34 @@ In case of failure :
   "messsage": "Description"
 }
 ```
+
+in case of no errors or failures:
+
+- if the file is still in queue this will be the response:
+
+```json
+{
+  "status": "Ok",
+  "message": "File is still in queue."
+}
+```
+
+- if the file is under processing this will be the response:
+
+```json
+{
+  "status": "Ok",
+  "message": "File is under processing"
+}
+```
+
+- if the system failed to process the file this will be the response:
+
+```json
+{
+  "status": "Ok",
+  "message": "File failed to be processed"
+}
+```
+
+- otherwise the file will be sent.
