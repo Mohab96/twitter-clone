@@ -14,14 +14,14 @@ the purpose of this service is to manage files that is being uploaded and need t
 ### `/upload`
 
 through this endpoint you can upload a file to be stored in the file system.
-maximum size of a file to be uploaded is **3MB**
+maximum size of a file to be uploaded is **200MB**
 
 the response will be in this format in case there are no errors or failures:
 
 ```json
 {
-    "status":"Ok",
-    "id":<id of the uploaded file for later retrieval>,
+  "status": "Ok",
+  "id": "<id of the uploaded file for later retrieval>"
 }
 ```
 
