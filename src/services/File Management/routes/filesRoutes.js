@@ -2,7 +2,7 @@ const express = require("express");
 const multer = require("multer");
 const path = require("path");
 const { storeFile, sendFile } = require("../controllers/filesControllers");
-const { HTTP_400_BAD_REQUEST } = require("../utils/statusCodes");
+const { HTTP_400_BAD_REQUEST } = require("../../../shared/utils/statusCodes");
 const router = express.Router();
 router.use(express.json());
 const storage = multer.memoryStorage();

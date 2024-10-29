@@ -11,7 +11,7 @@ const {
   HTTP_202_Accepted,
   HTTP_102_Processing,
   HTTP_200_SUCCESS,
-} = require("../utils/statusCodes");
+} = require("../../../shared/utils/statusCodes");
 const RMQURL = process.env.RMQURL;
 
 async function pushToQueue(buffer, fileInfo, id) {
