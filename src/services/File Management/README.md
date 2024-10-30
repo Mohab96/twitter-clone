@@ -95,3 +95,12 @@ in case of no errors or failures:
 ```
 
 - otherwise the file will be sent.
+
+## Enviroment variables
+please make sure to configure these enviorment variables 
+
+```
+DATABASE_URL=<database connection string>
+PORT
+RMQURL=<rabbit mq server URL>
+```
