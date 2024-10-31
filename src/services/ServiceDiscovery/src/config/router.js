@@ -7,10 +7,15 @@ const sd = require("../ServiceDiscovery");
 
 const {
   HTTP_401_UNAUTHORIZED,
+  HTTP_400_BAD_REQUEST,
 } = require("../../../../shared/utils/statusCodes");
 
 mainRouter.get("/getinstance", async (req, res) => {
-  const path = req.body.path;
+  const path = req.query.servicePath;
+
+  if (!path) {
+    return ApiError(res, "Service path is required", HTTP_400_BAD_REQUEST);
+  }
 
   /*
   TODO: Send the request to auth service to check 
@@ -18,7 +23,7 @@ mainRouter.get("/getinstance", async (req, res) => {
   */
 
   let hasAccess = false;
-  for (const [servicePath, serviceName] of Object.entries(sd.services)) {
+  for (const [path, name] of Object.entries(sd.services)) {
     if (servicePath == path) {
       hasAccess = true;
       break;
