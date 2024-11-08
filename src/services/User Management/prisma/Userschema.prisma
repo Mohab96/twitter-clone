@@ -14,14 +14,14 @@ model User {
   user_name        String     @unique
   email            String     @unique
   password         String
-  phone_number     String
+  phone_number     String?
   bio              String     @default("")
   followers_cnt    Int        @default(0)
   following_cnt    Int        @default(0)
   profile_pic      String?
   cover_pic        String?
   age              Int
-  date_of_birth    DateTime
+  date_of_birth    DateTime?
   created_at       DateTime   @default(now())
   update_at        DateTime   @updatedAt
 
