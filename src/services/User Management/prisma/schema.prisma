@@ -25,11 +25,11 @@ model User {
   created_at       DateTime   @default(now())
   update_at        DateTime   @updatedAt
 
-  followers        Followers[] @relation("UserFollowers")
-  following        Followers[] @relation("UserFollowing")
+  followers        Follower[] @relation("UserFollowers")
+  following        Follower[] @relation("UserFollowing")
 }
 
-model Followers {
+model Follower {
   follower_id      Int
   following_id     Int
 
