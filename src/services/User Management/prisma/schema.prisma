@@ -8,11 +8,11 @@ generator client {
 }
 
 model User {
-  id               Int        @id @default(autoincrement())
+  id               Int        @id @default(autoincrement()) @unique
   first_name       String
   last_name        String
   user_name        String     @unique
-  email            String     @unique
+  email            String     @unique 
   password         String
   phone_number     String?
   bio              String     @default("")
