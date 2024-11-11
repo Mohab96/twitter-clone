@@ -16,8 +16,8 @@ const upload = multer({ storage: storage });
 
 router.post("/bio", changeBio);
 router.get("/profile/:id", getProfile);
-router.post("/avatar", upload.single("file"), changeProfilePic);
-router.post("/cover", upload.single("file"), changeCoverPic);
+router.post("/profile-pic", upload.single("file"), changeProfilePic);
+router.post("/cover-pic", upload.single("file"), changeCoverPic);
 router.post("/username", changeUsername);
 router.post("/follow"); // follow a user
 router.delete("/follow"); // unfollow a user
