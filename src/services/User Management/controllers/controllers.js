@@ -1,4 +1,6 @@
 const { PrismaClient } = require("@prisma/client");
+const axios = require("axios");
+const FormData = require("form-data");
 const prisma = new PrismaClient();
 /* the auth service must provide the user id in the request body */
 
@@ -85,7 +87,6 @@ changeUsername = async (req, res) => {
 };
 getAllFollowers = async (req, res) => {};
 getProfile = async (req, res) => {
-  /* add the cover image and the profile image to the response */
   try {
     const userId = +req.params.id;
     const user = await prisma.user.findFirst({
@@ -100,6 +101,7 @@ getProfile = async (req, res) => {
         following_cnt: true,
         bio: true,
         user_name: true,
+        date_of_birth: true,
       },
     });
     if (!user) {
@@ -119,8 +121,83 @@ getProfile = async (req, res) => {
     });
   }
 };
-changeProfilePic = async (req, res) => {};
-changeCoverPic = async (req, res) => {};
+
+changeProfilePic = async (req, res) => {
+  if (!req.file) {
+    return res
+      .status(400)
+      .json({ status: "Fail", message: "No image uploaded." });
+  }
+  if (!req.body.id) {
+    return res
+      .status(400)
+      .json({ status: "Fail", message: "User id is not provided." });
+  }
+  try {
+    const formData = new FormData();
+    formData.append("file", req.file.buffer, req.file.originalname);
+
+    const response = await axios.post(
+      process.env.FILE_SERVICE + "/upload",
+      formData,
+      {
+        headers: formData.getHeaders(),
+      }
+    );
+    await prisma.user.update({
+      where: {
+        id: +req.body.id,
+      },
+      data: {
+        profile_pic: response.data.id,
+      },
+    });
+    res.status(201).json({
+      status: "Ok",
+      message: "Profile image updated",
+    });
+  } catch (err) {
+    res.status(500).json({ status: "Error", error: err });
+  }
+};
+changeCoverPic = async (req, res) => {
+  if (!req.file) {
+    return res
+      .status(400)
+      .json({ status: "Fail", message: "No image uploaded." });
+  }
+  if (!req.body.id) {
+    return res
+      .status(400)
+      .json({ status: "Fail", message: "User id is not provided." });
+  }
+  try {
+    const formData = new FormData();
+    formData.append("file", req.file.buffer, req.file.originalname);
+
+    const response = await axios.post(
+      process.env.FILE_SERVICE + "/upload",
+      formData,
+      {
+        headers: formData.getHeaders(),
+      }
+    );
+    await prisma.user.update({
+      where: {
+        id: +req.body.id,
+      },
+      data: {
+        cover_pic: response.data.id,
+      },
+    });
+    res.status(201).json({
+      status: "Ok",
+      message: "Cover image updated",
+    });
+  } catch (err) {
+    res.status(500).json({ status: "Error", error: err });
+  }
+};
 
 module.exports = {
   changeBio,
