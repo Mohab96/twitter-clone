@@ -1,5 +1,6 @@
 const { PrismaClient } = require("@prisma/client");
 const axios = require("axios");
+const e = require("express");
 const FormData = require("form-data");
 const prisma = new PrismaClient();
 /* the auth service must provide the user id in the request body */
@@ -87,12 +88,23 @@ changeUsername = async (req, res) => {
 };
 getAllFollowers = async (req, res) => {};
 getProfile = async (req, res) => {
+  const { email, username, id } = req.body;
+  const whereClause = email
+    ? { email }
+    : username
+    ? { user_name: username }
+    : id
+    ? { id }
+    : null;
+  if (!whereClause) {
+    return res.status(400).json({
+      status: "Fail",
+      message: "Please provide an email, username, or id.",
+    });
+  }
   try {
-    const userId = +req.params.id;
     const user = await prisma.user.findFirst({
-      where: {
-        id: userId,
-      },
+      where: whereClause,
       select: {
         first_name: true,
         last_name: true,
@@ -102,6 +114,7 @@ getProfile = async (req, res) => {
         bio: true,
         user_name: true,
         date_of_birth: true,
+        created_at: true,
       },
     });
     if (!user) {
@@ -121,7 +134,68 @@ getProfile = async (req, res) => {
     });
   }
 };
-
+getProfilePic = async (req, res) => {
+  try {
+    const user = await prisma.user.findFirst({
+      where: {
+        id: +req.params.id,
+      },
+      select: {
+        profile_pic: true,
+      },
+    });
+    if (!user.profile_pic) {
+      return res.status(400).json({
+        status: "Fail",
+        message: "User not found or user doesn't have a profile image",
+      });
+    }
+    const image = await axios({
+      method: "get",
+      url: process.env.FILE_SERVICE + `/download/${user.profile_pic}`,
+      responseType: "stream",
+    });
+    res.setHeader("Content-Type", image.headers["content-type"]);
+    res.setHeader("Content-Disposition", image.headers["content-disposition"]);
+    image.data.pipe(res);
+  } catch (err) {
+    return res.status(500).json({
+      status: "Error",
+      error: err,
+    });
+  }
+};
+getCoverPic = async (req, res) => {
+  try {
+    const user = await prisma.user.findFirst({
+      where: {
+        id: +req.params.id,
+      },
+      select: {
+        cover_pic: true,
+      },
+    });
+    if (!user.cover_pic) {
+      return res.status(400).json({
+        status: "Fail",
+        message: "User not found or user doesn't have a cover image",
+      });
+    }
+    const image = await axios({
+      method: "get",
+      url: process.env.FILE_SERVICE + `/download/${user.cover_pic}`,
+      responseType: "stream",
+    });
+    res.setHeader("Content-Type", image.headers["content-type"]);
+    res.setHeader("Content-Disposition", image.headers["content-disposition"]);
+    image.data.pipe(res);
+  } catch (err) {
+    return res.status(500).json({
+      status: "Error",
+      error: err,
+    });
+  }
+};
 changeProfilePic = async (req, res) => {
   if (!req.file) {
     return res
@@ -206,4 +280,6 @@ module.exports = {
   changeUsername,
   getAllFollowers,
   getProfile,
+  getProfilePic,
+  getCoverPic,
 };
