@@ -3,7 +3,7 @@ const axios = require("axios");
 const e = require("express");
 const FormData = require("form-data");
 const prisma = new PrismaClient();
-/* the auth service must provide the user id in the request body */
+/* the auth service must provide the user id in the request headers */
 
 changeBio = async (req, res) => {
   try {
@@ -13,7 +13,7 @@ changeBio = async (req, res) => {
         message: "No bio was provided.",
       });
     }
-    if (!req.body.id) {
+    if (!req.id) {
       return res.status(400).json({
         status: "Fail",
         message: "No id was provided.",
@@ -21,7 +21,7 @@ changeBio = async (req, res) => {
     }
     const result = await prisma.user.update({
       where: {
-        id: +req.body.id,
+        id: +req.id,
       },
       data: {
         bio: req.body.bio,
@@ -86,7 +86,37 @@ changeUsername = async (req, res) => {
     });
   }
 };
-getAllFollowers = async (req, res) => {};
+getAllFollowers = async (req, res) => {
+  try {
+    const page = req.query.page || 1;
+    const limit = req.query.limit || 10;
+    const offset = (page - 1) * limit;
+    const followers = await prisma.follower.findMany({
+      where: {
+        following_id: +req.params.id,
+      },
+      select: {
+        follower: {
+          select: {
+            first_name: true,
+            last_name: true,
+            user_name: true,
+            bio: true,
+          },
+        },
+      },
+      skip: offset,
+      take: limit,
+    });
+    const followerDetails = followers.map((f) => f.follower);
+    res.status(200).json({ status: "Ok", data: followerDetails });
+  } catch (err) {
+    res.status(500).json({
+      status: "Error",
+      error: err,
+    });
+  }
+};
 getProfile = async (req, res) => {
   const { email, username, id } = req.body;
   const whereClause = email
@@ -202,7 +232,7 @@ changeProfilePic = async (req, res) => {
       .status(400)
       .json({ status: "Fail", message: "No image uploaded." });
   }
-  if (!req.body.id) {
+  if (!req.id) {
     return res
       .status(400)
       .json({ status: "Fail", message: "User id is not provided." });
@@ -220,7 +250,7 @@ changeProfilePic = async (req, res) => {
     );
     await prisma.user.update({
       where: {
-        id: +req.body.id,
+        id: +req.id,
       },
       data: {
         profile_pic: response.data.id,
@@ -240,7 +270,7 @@ changeCoverPic = async (req, res) => {
       .status(400)
       .json({ status: "Fail", message: "No image uploaded." });
   }
-  if (!req.body.id) {
+  if (!req.id) {
     return res
       .status(400)
       .json({ status: "Fail", message: "User id is not provided." });
@@ -258,7 +288,7 @@ changeCoverPic = async (req, res) => {
     );
     await prisma.user.update({
       where: {
-        id: +req.body.id,
+        id: +req.id,
       },
       data: {
         cover_pic: response.data.id,
@@ -272,7 +302,37 @@ changeCoverPic = async (req, res) => {
     res.status(500).json({ status: "Error", error: err });
   }
 };
-
+getAllFollowings = async (req, res) => {
+  try {
+    const page = req.query.page || 1;
+    const limit = req.query.limit || 10;
+    const offset = (page - 1) * limit;
+    const followings = await prisma.follower.findMany({
+      where: {
+        follower_id: +req.params.id,
+      },
+      select: {
+        following: {
+          select: {
+            first_name: true,
+            last_name: true,
+            user_name: true,
+            bio: true,
+          },
+        },
+      },
+      skip: offset,
+      take: limit,
+    });
+    const followingsDetails = followings.map((f) => f.following);
+    res.status(200).json({ status: "Ok", data: followingsDetails });
+  } catch (err) {
+    res.status(500).json({
+      status: "Error",
+      error: err,
+    });
+  }
+};
 module.exports = {
   changeBio,
   changeCoverPic,
@@ -282,4 +342,5 @@ module.exports = {
   getProfile,
   getProfilePic,
   getCoverPic,
+  getAllFollowings,
 };
