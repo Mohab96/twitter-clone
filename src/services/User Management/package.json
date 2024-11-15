@@ -1,11 +1,23 @@
 {
+  "name": "user-management",
+  "version": "1.0.0",
+  "description": "service to manage user actions",
+  "main": "server.js",
   "dependencies": {
     "@prisma/client": "^5.22.0",
+    "amqplib": "^0.10.4",
     "axios": "^1.7.7",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
     "joi": "^17.13.3",
     "multer": "^1.4.5-lts.1",
     "prisma": "^5.22.0"
+  },
+  "scripts": {
+    "dev": "nodemon server.js",
+    "prod": "node server.js"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.7"
   }
 }

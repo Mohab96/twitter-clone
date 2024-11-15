@@ -32,7 +32,7 @@ model User {
 model Follower {
   follower_id      Int
   following_id     Int
-
+  created_at       DateTime   @default(now())
   follower         User        @relation("UserFollowers", fields: [follower_id], references: [id])
   following        User        @relation("UserFollowing", fields: [following_id], references: [id])
 
