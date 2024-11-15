@@ -1,7 +1,4 @@
-const { PrismaClient } = require("@prisma/client");
-const axios = require("axios");
-const FormData = require("form-data");
-const prisma = new PrismaClient();
+const prisma = require("../prisma/prismaClient");
 const {
   HTTP_400_BAD_REQUEST,
   HTTP_200_SUCCESS,
