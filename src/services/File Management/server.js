@@ -1,9 +1,11 @@
 const express = require("express");
-const fs = require("fs");
+const consume = require("./rmq/rmqConsumerServer");
+const connectToDB = require("./prisma/connectToDB");
+const fileRoutes = require("./routes/filesRoutes");
 require("dotenv").config();
+const fs = require("fs");
 const app = express();
 app.use(express.json());
-const fileRoutes = require("./routes/filesRoutes");
 
 app.use("/api/file", fileRoutes);
 
@@ -16,4 +18,6 @@ app.listen(process.env.PORT, () => {
   } else {
     console.log("[!] uploads folder already exists.");
   }
+  connectToDB();
+  consume();
 });
