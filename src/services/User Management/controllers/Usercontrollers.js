@@ -35,7 +35,12 @@ const changeBio = async (req, res) => {
         message: "User not found",
       });
     }
-    return res.status(HTTP_200_SUCCESS).json({ status: "Ok", data: result });
+    return res.status(HTTP_200_SUCCESS).json({
+      status: "Ok",
+      data: {
+        bio: result.bio,
+      },
+    });
   } catch (err) {
     return res.status(HTTP_500_INTERNAL_SERVER_ERROR).json({
       status: "Error",
