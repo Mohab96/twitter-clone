@@ -1,9 +1,8 @@
 const path = require("path");
-const amqp = require("amqplib");
 const fs = require("fs");
 const prisma = require("../prisma/prismaClient");
 const uploadDir = path.join(__dirname, "../uploads");
-const rabbitMqUrl = process.env.RMQURL;
+const { getChannel } = require("../rmq/establishRMQConnection");
 async function saveFileToDisk(fileBuffer, filename, fileId) {
   try {
     const filePath = path.join(uploadDir, filename);
@@ -30,9 +29,7 @@ async function saveFileToDisk(fileBuffer, filename, fileId) {
   }
 }
 async function consume() {
-  const connection = await amqp.connect(rabbitMqUrl);
-  const channel = await connection.createChannel();
-  await channel.assertQueue("files", { durable: true });
+  const channel = getChannel();
   console.log("[!] Waiting for messages in queue...");
   channel.consume("files", async (message) => {
     if (message !== null) {
