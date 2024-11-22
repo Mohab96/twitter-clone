@@ -1,8 +1,8 @@
+require("dotenv").config();
 const express = require("express");
 const consume = require("./rmq/rmqConsumerServer");
 const connectToDB = require("./prisma/connectToDB");
 const fileRoutes = require("./routes/filesRoutes");
-require("dotenv").config();
 const fs = require("fs");
 const app = express();
 app.use(express.json());
