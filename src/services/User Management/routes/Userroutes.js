@@ -1,22 +1,16 @@
 const express = require("express");
 const multer = require("multer");
-const {
-  changeBio,
-  changeUsername,
-  getProfile,
-} = require("../controllers/Usercontrollers");
-const {
-  follow,
-  unfollow,
-  getAllFollowers,
-  getAllFollowings,
-} = require("../controllers/FollowingManagementControllers");
-const {
-  changeCoverPic,
-  changeProfilePic,
-  getProfilePic,
-  getCoverPic,
-} = require("../controllers/UserPicsControllers");
+const changeBio = require("../controllers/changeBio");
+const changeUsername = require("../controllers/changeUsername");
+const getProfile = require("../controllers/getProfile");
+const getAllFollowers = require("../controllers/getAllFollowers");
+const follow = require("../controllers/follow");
+const unfollow = require("../controllers/unfollow");
+const getAllFollowings = require("../controllers/getAllFollowings");
+const changeCoverPic = require("../controllers/changeCoverPic");
+const changeProfilePic = require("../controllers/changeProfilePic");
+const getProfilePic = require("../controllers/getProfile");
+const getCoverPic = require("../controllers/getCoverPic");
 const router = express.Router();
 router.use(express.json());
 

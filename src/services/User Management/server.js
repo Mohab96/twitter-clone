@@ -1,15 +1,34 @@
+require("dotenv").config();
+const {
+  establishRMQConnection,
+  getChannel,
+  getConnection,
+} = require("./rmq/establishRMQConnection");
 const express = require("express");
-const consume = require("./rmq/rmqConsumerServer");
 const connectToDB = require("./prisma/connectToDB");
 const app = express();
-require("dotenv").config();
 const userRoutes = require("./routes/Userroutes");
 app.use(express.json());
+const consume = require("./rmq/rmqConsumerServer");
 
 app.use("/api/user", userRoutes);
 
-app.listen(process.env.PORT || 3000, () => {
-  console.log("[!] server is running on port:", process.env.PORT || 3000);
+app.listen(process.env.PORT, async () => {
+  console.log("[!] server is running on port:", process.env.PORT);
   connectToDB();
+  await establishRMQConnection();
   consume();
+});
+
+process.on("SIGINT", async () => {
+  console.log("\nShutting down...\n");
+  if (getChannel()) {
+    console.log("[!] Closing RMQ Channels.\n");
+    await getChannel().close();
+  }
+  if (getConnection()) {
+    console.log("[!] Closing RMQ Connections.");
+    await getConnection().close();
+  }
+  process.exit(0);
 });

@@ -1,13 +1,9 @@
-const amqp = require("amqplib");
 const prisma = require("../prisma/prismaClient");
-const rabbitMqUrl = process.env.RMQURL;
+const { getChannel } = require("../rmq/establishRMQConnection");
+
 const consume = async () => {
-  const connection = await amqp.connect(rabbitMqUrl);
-  const channel = await connection.createChannel();
-  await channel.assertQueue("following-management", { durable: true });
-
+  const channel = getChannel();
   console.log("[!] Waiting for messages in following-management queue...");
-
   channel.consume("following-management", async (message) => {
     if (message !== null) {
       try {

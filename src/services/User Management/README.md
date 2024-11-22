@@ -579,3 +579,14 @@ in case of success
   "message": "Cover image updated"
 }
 ```
+
+### environment variables
+
+please make sure to configure these environment variables
+
+```
+DATABASE_URL = <database connection string>
+PORT
+FILE_SERVICE = <file_service_url/api/file>
+RMQURL = <rabbitmq server connection string>
+```
