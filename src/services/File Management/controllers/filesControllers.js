@@ -1,8 +1,6 @@
-const { PrismaClient } = require("@prisma/client");
-const amqp = require("amqplib");
-const prisma = new PrismaClient();
 const path = require("path");
 const fs = require("fs");
+const prisma = require("../prisma/prismaClient");
 const {
   HTTP_400_BAD_REQUEST,
   HTTP_201_CREATED,
@@ -12,38 +10,8 @@ const {
   HTTP_102_Processing,
   HTTP_200_SUCCESS,
 } = require("../../../shared/utils/statusCodes");
-const RMQURL = process.env.RMQURL;
+const pushToQueue = require("../rmq/pushToRMQ");
 
-async function pushToQueue(buffer, fileInfo, id) {
-  try {
-    const connection = await amqp.connect(RMQURL);
-    const channel = await connection.createChannel();
-    await channel.assertQueue("files", { durable: true });
-    const message = {
-      buffer: buffer,
-      fileName: fileInfo.originalname,
-      fileId: id,
-    };
-    await channel.sendToQueue("files", Buffer.from(JSON.stringify(message)));
-    console.log("Message Sent!");
-    await channel.close();
-    await connection.close();
-  } catch (err) {
-    try {
-      await prisma.file.update({
-        where: {
-          id: id,
-        },
-        data: {
-          status: "Failed",
-        },
-      });
-    } catch (err) {
-      console.log("Error happened with the database", err);
-    }
-    console.log("Error happend, message did not sent to the queue", err);
-  }
-}
 const storeFile = async (req, res) => {
   try {
     if (!req.file) {
