@@ -16,7 +16,7 @@ const signup = async (req, res) => {
     });
     if (isMatchEmail) {
       return res.status(HTTP_400_BAD_REQUEST).json({
-        statsu: "Fail",
+        status: "Fail",
         message: "Email already exists",
       });
     }
@@ -27,7 +27,7 @@ const signup = async (req, res) => {
     });
     if (isMatchUsername) {
       return res.status(400).json({
-        statsu: "Fail",
+        status: "Fail",
         message: "username already exists",
       });
     }
@@ -49,13 +49,13 @@ const signup = async (req, res) => {
       },
     });
     return res.status(HTTP_201_CREATED).json({
-      statsu: "Ok",
+      status: "Ok",
       message: "User created",
     });
     /// todo: send email to the email address [emailing service]
   } catch (err) {
     return res.status(HTTP_500_INTERNAL_SERVER_ERROR).json({
-      statsu: "Error",
+      status: "Error",
       error: err,
     });
   }
