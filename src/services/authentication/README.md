@@ -111,7 +111,7 @@ in case of sucess
 
 ```json
 {
-  "data": { "protected": true, "payload": "payload" },
+  "data": { "protected": true, "payload": {"username":"username1", "userid":"userid1", "email":"email1"} },
   "status": "Ok"
 }
 ```
