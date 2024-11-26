@@ -25,7 +25,7 @@ const changePassword = async (req, res) => {
     /// todo: send email to the email address [emailing service]
   } catch (error) {
     return res.status(HTTP_500_INTERNAL_SERVER_ERROR).json({
-      staus: "Error",
+      status: "Error",
       error: error,
     });
   }
