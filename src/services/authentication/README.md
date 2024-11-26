@@ -2,7 +2,7 @@
 
 ## overview
 
-the goal of this service to handle handle requests related to the authentication and check if this user is authorized to access a specifc route or not
+the goal of this service to handle requests related to the authentication and check if this user is authorized to access a specifc route or not
 
 ## API endpoints
 
