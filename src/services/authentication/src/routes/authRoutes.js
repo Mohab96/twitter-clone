@@ -5,6 +5,6 @@ authRouter.use(express.json());
 const { checkToken } = require("../controllers/checkToken");
 
 // routes
-authRouter.get("/check", checkToken);
+authRouter.get("/check-route", checkToken);
 
 module.exports = authRouter;
