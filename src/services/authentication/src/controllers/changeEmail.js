@@ -8,6 +8,8 @@ const {
 const checkHash = require("../bcryptHash/checkHash");
 const prisma = require("../prisma/prismaClient");
 
+const pushToQueue = require("../rmq/pushToRMQ");
+
 const changeEmail = async (req, res) => {
   try {
     if (!req.body.email) {
@@ -53,10 +55,16 @@ const changeEmail = async (req, res) => {
         email: req.body.email,
       },
     });
-    return res.status(HTTP_200_SUCCESS).json({
+    await pushToQueue({
+      mode: 0,
+      type: "change-email",
+      username: req.payload.username,
+      email: req.payload.email,
+    });
+
+    res.status(HTTP_200_SUCCESS).json({
       status: "Ok",
     });
-    /// todo: send email to the new email address [emailing service]
   } catch (err) {
     return res.status(HTTP_500_INTERNAL_SERVER_ERROR).json({
       status: "Error",

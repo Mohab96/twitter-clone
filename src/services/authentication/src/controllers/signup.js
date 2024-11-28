@@ -1,5 +1,6 @@
 const prisma = require("../prisma/prismaClient");
 const hashPassword = require("../bcryptHash/generateHash");
+const pushToQueue = require("../rmq/pushToRMQ");
 
 const {
   HTTP_201_CREATED,
@@ -48,11 +49,18 @@ const signup = async (req, res) => {
         ...(req.body.phone_number && { phone_number: req.body.phone_number }),
       },
     });
-    return res.status(HTTP_201_CREATED).json({
+
+    await pushToQueue({
+      mode: 0,
+      type: "sign-up",
+      username: req.body.username,
+      email: req.body.email,
+    });
+
+    res.status(HTTP_201_CREATED).json({
       status: "Ok",
       message: "User created",
     });
-    /// todo: send email to the email address [emailing service]
   } catch (err) {
     return res.status(HTTP_500_INTERNAL_SERVER_ERROR).json({
       status: "Error",

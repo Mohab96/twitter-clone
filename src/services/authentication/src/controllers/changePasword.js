@@ -1,5 +1,6 @@
 const prisma = require("../prisma/prismaClient");
 const hashPassword = require("../bcryptHash/generateHash");
+const pushToQueue = require("../rmq/pushToRMQ");
 
 const {
   HTTP_201_CREATED,
@@ -19,10 +20,16 @@ const changePassword = async (req, res) => {
         password: hashedPassword,
       },
     });
+    await pushToQueue({
+      mode: 0,
+      type: "change-password",
+      username: req.payload.username,
+      email: req.payload.email,
+    });
+
     res.status(HTTP_201_CREATED).json({
       status: "Ok",
     });
-    /// todo: send email to the email address [emailing service]
   } catch (error) {
     return res.status(HTTP_500_INTERNAL_SERVER_ERROR).json({
       status: "Error",
