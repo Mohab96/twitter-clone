@@ -6,6 +6,7 @@ const HTTP_401_UNAUTHORIZED = 401;
 const HTTP_404_NOT_FOUND = 404;
 const HTTP_202_Accepted = 202;
 const HTTP_102_Processing = 102;
+const HTTP_403_Forbidden = 404;
 
 module.exports = {
   HTTP_200_SUCCESS,
@@ -16,4 +17,5 @@ module.exports = {
   HTTP_404_NOT_FOUND,
   HTTP_202_Accepted,
   HTTP_102_Processing,
+  HTTP_403_Forbidden,
 };
